@@ -8,13 +8,24 @@ body,
   height: 100%;
   font-family: "Inter", system-ui, sans-serif;
 }
-
 .btn-primary {
   @apply bg-brand-600 hover:bg-brand-700 text-white font-medium px-4 py-2 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
+.btn-primary:hover {
+  @apply bg-brand-700;
+}
+
+.btn-primary:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
 .input {
-  @apply w-full px-3 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition;
+  @apply w-full px-3 py-2 rounded-xl border border-slate-200 outline-none transition;
+}
+
+.input:focus {
+  @apply border-brand-500 ring-2 ring-brand-500/20;
 }
 
 .card {
