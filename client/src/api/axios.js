@@ -8,8 +8,13 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
     const { token } = useAuth.getState();
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    config.headers['x-device-fp'] = localStorage.getItem('device_fp') || '';
+
+    console.log("TOKEN:", token);
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
 });
 

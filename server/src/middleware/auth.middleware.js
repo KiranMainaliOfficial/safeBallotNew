@@ -6,10 +6,17 @@ export function verifyJWT(req, res, next) {
         return res.status(401).json({ success: false, message: 'No token provided' });
     }
     try {
-        req.user = verifyAccess(header.split(' ')); next();
+        const token = header.split(' ')[1];
 
+        console.log("HEADER:", header);
+        console.log("TOKEN:", token);
+        console.log("USER:", verifyAccess(token));
+
+        req.user = verifyAccess(token);
+        next();
     }
-    catch {
+    catch (error) {
+        console.error("AUTH ERROR:", error);
         return res.status(401).json({ success: false, message: 'Invalid or expired token' });
     }
 }
