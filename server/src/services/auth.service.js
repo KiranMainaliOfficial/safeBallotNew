@@ -4,17 +4,24 @@ import Log from '../models/Log.model.js';
 import { sha256, generateOtp } from '../utils/crypto.js';
 import { signAccess, signRefresh } from '../utils/jwt.js';
 import { sendOtp } from './mail.service.js';
+import { sendSms } from './twilo.service.js';
 
-export async function register({ name, email, password, meta }) {
+
+export async function register({ name, email, phone, password, meta }) {
     const exists = await User.findOne({ email });
     if (exists) {
         throw Object.assign(new Error('Email already registered'), { status: 409 });
+    }
+    const phoneExists = await User.findOne({ phone });
+    if (phoneExists) {
+        throw Object.assign(new Error('Phone number already registered'), { status: 409 });
     }
     const passwordHash = await bcrypt.hash(password, 12);
     const otp = generateOtp();
     const user = await User.create({
         name,
         email,
+        phone,
         passwordHash,
         otpHash: sha256(otp),
         otpExpires: new Date(Date.now() + 10 * 60 * 1000),
@@ -23,6 +30,7 @@ export async function register({ name, email, password, meta }) {
     });
 
     await sendOtp(email, otp);
+    await sendSms(phone, `Your SafeBallot verification code is: ${otp}`);
     await Log.create({
         userId: user._id,
         action: 'REGISTER',

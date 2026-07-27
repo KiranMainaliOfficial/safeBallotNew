@@ -19,6 +19,10 @@ connectDB()
         server.listen(env.PORT, () =>
             logger.info(`SafeBallot API listening on :${env.PORT}`)
         );
+        // app.listen(env.PORT, '0.0.0.0', () => {
+        //     console.log('Server running on port 5000 and accessible on network');
+        // });
+
     })
     .catch((err) => {
         logger.error({ msg: 'Startup failed', error: err.message });

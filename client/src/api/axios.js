@@ -15,6 +15,11 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
 
+    const fp = localStorage.getItem('device_fp');
+    if (fp) {
+        config.headers['X-Device-Fp'] = fp;
+    }
+
     return config;
 });
 

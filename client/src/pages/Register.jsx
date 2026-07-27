@@ -6,7 +6,7 @@ import Button from "../components/common/Button";
 import { registerApi } from "../api/auth.api";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
@@ -15,7 +15,7 @@ export default function Register() {
     setLoading(true);
     try {
       await registerApi(form);
-      toast.success("Account created. Check email/server console for OTP.");
+      toast.success("Account created. Check SMS/email/server console for OTP.");
       nav(`/verify-otp?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
       toast.error(err.response?.data?.message || "Registration failed");
@@ -44,6 +44,14 @@ export default function Register() {
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <Input
+            label="Phone Number"
+            type="tel"
+            placeholder="+1234567890"
+            required
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
           <Input
             label="Password"

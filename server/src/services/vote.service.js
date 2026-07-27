@@ -28,6 +28,7 @@ export async function castVote({ user, electionId, candidateId, meta, io }) {
             electionId,
             ip: meta.ip,
             deviceFingerprint: meta.deviceFingerprint,
+            userAgent: meta.userAgent,
         });
         if (fraud.block) {
             throw Object.assign(new Error('Vote blocked: suspicious activity detected'), { status: 403 });

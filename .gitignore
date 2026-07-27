@@ -1,0 +1,2 @@
+client/.env
+server/src/config/env.js

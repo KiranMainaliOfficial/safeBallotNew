@@ -16,7 +16,10 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(
     cors({
-        origin: env.CLIENT_URL,
+        origin: [
+            env.CLIENT_URL,
+            "http://192.168.1.69:5000"// this is for the mobile phones.
+        ],
         credentials: true,
     })
 );

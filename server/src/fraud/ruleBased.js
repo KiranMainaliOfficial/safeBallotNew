@@ -1,6 +1,7 @@
 import Log from '../models/Log.model.js';
+import { parseUserAgent } from '../utils/uaParser.js';
 
-export async function ruleBasedCheck({ ip, deviceFingerprint }) {
+export async function ruleBasedCheck({ ip, deviceFingerprint, userAgent }) {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const sameIpVotes = await Log.countDocuments({
@@ -25,12 +26,19 @@ export async function ruleBasedCheck({ ip, deviceFingerprint }) {
     //     return { flagged: false };
     // }
     if (sameIpVotes >= 3 || sameDevice >= 2) {
+        const { browser, os } = parseUserAgent(userAgent);
         return {
             flagged: true,
             type: 'SAME_IP',
             severity: sameIpVotes >= 5 ? 'high' : 'medium',
             evidence: {
-                sameIpVotes, sameDevice, ip, deviceFingerprint
+                sameIpVotes,
+                sameDevice,
+                ip,
+                deviceFingerprint,
+                browser,
+                os,
+                userAgent,
             },
         };
     }

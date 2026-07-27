@@ -23,7 +23,7 @@ export const login = async (req, res, next) => {
     try {
         const data = await svc.login({ ...req.body, meta: req.meta });
         res.cookie('refreshToken', data.refreshToken, {
-            httpOnly: true,
+            httpOnly: false,
             sameSite: 'strict',
             secure: process.env.NODE_ENV === 'production',
             maxAge: 7 * 24 * 60 * 60 * 1000,
