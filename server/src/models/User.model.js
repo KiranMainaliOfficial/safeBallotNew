@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema(
         otpHash: String,
         otpExpires: Date, registeredIp: String, deviceFingerprint: String, failedLoginAttempts: { type: Number, default: 0 }, lockUntil: Date,
         kycComplete: { type: Boolean, default: false },
+        faceEmbedding: { type: [Number], default: undefined },
+        faceRegistered: { type: Boolean, default: false },
+        faceVerifiedAt: { type: Date },
         kycData: {
             selfie: String,
             location: {

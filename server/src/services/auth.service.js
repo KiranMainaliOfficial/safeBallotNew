@@ -5,6 +5,8 @@ import { sha256, generateOtp } from '../utils/crypto.js';
 import { signAccess, signRefresh } from '../utils/jwt.js';
 import { sendOtp } from './mail.service.js';
 import { sendSms } from './twilo.service.js';
+import { uploadToImageKit } from '../config/imagekit.js';
+import { generateFaceEmbedding, getSingleFaceEmbedding, computeCosineSimilarity } from './ai.service.js';
 
 
 export async function register({ name, email, phone, password, meta }) {
@@ -130,9 +132,26 @@ export async function submitKyc(userId, kycData, meta) {
         throw Object.assign(new Error('User not found'), { status: 404 });
     }
 
+    const { selfie, selfies, ...otherKycData } = kycData;
+
+    // 1. Upload main reference selfie to ImageKit
+    console.log("Uploading reference selfie to ImageKit...");
+    const imageUrl = await uploadToImageKit(selfie, `selfie_${userId}_${Date.now()}.jpg`);
+    console.log("Uploaded successfully. URL:", imageUrl);
+
+    // 2. Generate face embedding from captured selfies
+    const photosToEmbed = (selfies && selfies.length > 0) ? selfies : [selfie];
+    console.log(`Generating face embedding from ${photosToEmbed.length} images...`);
+    const embedding = await generateFaceEmbedding(photosToEmbed);
+    console.log("Face embedding generated successfully.");
+
+    // 3. Update User Document
+    user.faceEmbedding = embedding;
+    user.faceRegistered = true;
     user.kycComplete = true;
     user.kycData = {
-        ...kycData,
+        ...otherKycData,
+        selfie: imageUrl,
         submittedAt: new Date(),
     };
 
@@ -153,4 +172,51 @@ export async function submitKyc(userId, kycData, meta) {
         role: user.role,
         kycComplete: user.kycComplete,
     };
+}
+
+export async function verifyFace(userId, liveImage, meta) {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw Object.assign(new Error('User not found'), { status: 404 });
+    }
+    if (!user.faceRegistered || !user.faceEmbedding) {
+        throw Object.assign(new Error('Biometric credentials not found. Please complete face registration first.'), { status: 400 });
+    }
+
+    console.log("Generating embedding for live face scan...");
+    const liveEmbedding = await getSingleFaceEmbedding(liveImage);
+    
+    console.log("Comparing embeddings...");
+    const similarity = computeCosineSimilarity(user.faceEmbedding, liveEmbedding);
+    console.log("Similarity Score computed:", similarity);
+
+    const MATCH_THRESHOLD = 0.60; // Standard similarity threshold
+    const matched = similarity >= MATCH_THRESHOLD;
+
+    if (matched) {
+        user.faceVerifiedAt = new Date();
+        await user.save();
+
+        await Log.create({
+            userId: user._id,
+            action: 'BIOMETRIC_MATCH_SUCCESS',
+            ip: meta.ip,
+            deviceFingerprint: meta.deviceFingerprint,
+            userAgent: meta.userAgent,
+            meta: { score: similarity },
+        });
+
+        return { success: true, score: similarity };
+    } else {
+        await Log.create({
+            userId: user._id,
+            action: 'BIOMETRIC_MATCH_FAIL',
+            ip: meta.ip,
+            deviceFingerprint: meta.deviceFingerprint,
+            userAgent: meta.userAgent,
+            meta: { score: similarity },
+        });
+
+        throw Object.assign(new Error(`Face match failed (similarity: ${(similarity * 100).toFixed(1)}%). Please align your face in a well-lit environment.`), { status: 400 });
+    }
 }

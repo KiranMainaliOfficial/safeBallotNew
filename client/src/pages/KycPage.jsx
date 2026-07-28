@@ -17,6 +17,9 @@ export default function KycPage() {
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState("");
   const [selfie, setSelfie] = useState(null);
+  const [selfies, setSelfies] = useState([]);
+  const [capturingMultiple, setCapturingMultiple] = useState(false);
+  const [captureProgress, setCaptureProgress] = useState(0);
   const [declaration, setDeclaration] = useState(false);
 
   const [locating, setLocating] = useState(false);
@@ -88,17 +91,41 @@ export default function KycPage() {
   };
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = 300;
-      canvas.height = 300;
-      const ctx = canvas.getContext("2d");
+    if (!videoRef.current || !canvasRef.current) return;
+
+    setCapturingMultiple(true);
+    setSelfies([]);
+    setCaptureProgress(0);
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    canvas.width = 300;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+
+    let count = 0;
+    const tempSelfies = [];
+
+    const takeShot = () => {
+      if (count >= 5) {
+        setSelfies(tempSelfies);
+        setSelfie(tempSelfies[0]); // Reference photo is the first snapshot
+        setCapturingMultiple(false);
+        stopCamera();
+        toast.success("Captured 5 face angles successfully!");
+        return;
+      }
+
       ctx.drawImage(video, 0, 0, 300, 300);
       const dataUrl = canvas.toDataURL("image/jpeg");
-      setSelfie(dataUrl);
-      stopCamera();
-    }
+      tempSelfies.push(dataUrl);
+      count++;
+      setCaptureProgress(count);
+
+      setTimeout(takeShot, 450);
+    };
+
+    takeShot();
   };
 
   const handleFileUpload = (e) => {
@@ -107,6 +134,7 @@ export default function KycPage() {
       const reader = new FileReader();
       reader.onload = () => {
         setSelfie(reader.result);
+        setSelfies([reader.result]);
       };
       reader.readAsDataURL(file);
     }
@@ -132,6 +160,7 @@ export default function KycPage() {
     try {
       const payload = {
         selfie,
+        selfies: selfies.length > 0 ? selfies : [selfie],
         location: location || undefined,
         address: address.trim() || undefined,
         nid,
@@ -263,7 +292,7 @@ export default function KycPage() {
             <div className="flex flex-col md:flex-row gap-6 items-center">
               {/* Selfie Frame / Preview */}
               <div className="relative w-48 h-48 rounded-full border-4 border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center">
-                {selfie ? (
+                {selfie && !capturingMultiple ? (
                   <img src={selfie} alt="Selfie preview" className="w-full h-full object-cover" />
                 ) : cameraActive ? (
                   <video
@@ -275,6 +304,12 @@ export default function KycPage() {
                   />
                 ) : (
                   <span className="text-slate-400 text-4xl">📸</span>
+                )}
+                {capturingMultiple && (
+                  <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px] flex flex-col items-center justify-center text-white text-xs font-semibold select-none">
+                    <span className="text-xl mb-1 animate-bounce">⚡</span>
+                    <span>Angle {captureProgress}/5</span>
+                  </div>
                 )}
               </div>
 

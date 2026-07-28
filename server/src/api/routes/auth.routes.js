@@ -18,5 +18,6 @@ r.post('/login', loginLimiter, captureMeta, validate(loginSchema), c.login);
 r.post('/logout', verifyJWT, c.logout);
 r.get('/me', verifyJWT, c.getMe);
 r.post('/kyc', verifyJWT, captureMeta, validate(kycSchema), c.submitKyc);
+r.post('/verify-face', verifyJWT, captureMeta, c.verifyFace);
 
 export default r;

@@ -5,7 +5,7 @@ const logSchema = new mongoose.Schema(
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         action: {
             type: String,
-            enum: ['LOGIN', 'LOGIN_FAIL', 'REGISTER', 'VOTE', 'ADMIN_ACTION', 'LOGOUT', 'KYC_SUBMIT'],
+            enum: ['LOGIN', 'LOGIN_FAIL', 'REGISTER', 'VOTE', 'ADMIN_ACTION', 'LOGOUT', 'KYC_SUBMIT', 'BIOMETRIC_MATCH_SUCCESS', 'BIOMETRIC_MATCH_FAIL'],
             required: true,
         },
         ip: String,

@@ -58,3 +58,16 @@ export const submitKyc = async (req, res, next) => {
         next(e);
     }
 };
+
+export const verifyFace = async (req, res, next) => {
+    try {
+        const { image } = req.body;
+        if (!image) {
+            throw Object.assign(new Error('Live camera snapshot image is required'), { status: 400 });
+        }
+        const data = await svc.verifyFace(req.user.id, image, req.meta);
+        ok(res, data, 'Face matched successfully');
+    } catch (e) {
+        next(e);
+    }
+};

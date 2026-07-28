@@ -21,6 +21,7 @@ export const loginSchema = Joi.object({
 
 export const kycSchema = Joi.object({
     selfie: Joi.string().required(),
+    selfies: Joi.array().items(Joi.string()).min(1).optional(),
     location: Joi.object({
         latitude: Joi.number().required(),
         longitude: Joi.number().required()

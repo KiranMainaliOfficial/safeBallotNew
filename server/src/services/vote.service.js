@@ -8,6 +8,11 @@ export async function castVote({ user, electionId, candidateId, meta, io }) {
         if (!dbUser.kycComplete) {
             throw Object.assign(new Error('KYC not completed. You must complete KYC to vote.'), { status: 403 });
         }
+        if (!dbUser.faceVerifiedAt || (Date.now() - dbUser.faceVerifiedAt.getTime()) > 120000) {
+            throw Object.assign(new Error('Face verification session expired. Please verify your face again.'), { status: 403 });
+        }
+        dbUser.faceVerifiedAt = undefined;
+        await dbUser.save({ session });
         const election = await Election.findById(electionId).session(session); if (!election) throw Object.assign(new Error('Election not found'), { status: 404 }); if (election.status !== 'active') { throw Object.assign(new Error('Election is not active'), { status: 400 }); } const now = Date.now(); if (now < election.startTime.getTime() || now > election.endTime.getTime()) { throw Object.assign(new Error('Election window is closed'), { status: 400 }); }
 
         const candidate = await Candidate.findOne({

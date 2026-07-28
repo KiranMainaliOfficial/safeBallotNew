@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { getElectionApi } from "../api/election.api";
 import { castVoteApi } from "../api/vote.api";
+import { verifyFaceApi } from "../api/auth.api";
 import Loader from "../components/common/Loader";
 import Button from "../components/common/Button";
 import { useAuth } from "../store/authStore";
@@ -87,7 +88,7 @@ export default function VotePage() {
     }
   };
 
-  const captureAndMatch = () => {
+  const captureAndMatch = async () => {
     setScanStatus("comparing");
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -100,14 +101,18 @@ export default function VotePage() {
       setVerifiedSelfie(base64Selfie);
       stopScanner();
 
-      // Simulate biometric validation check comparing webcam capture with KYC selfie
-      const score = (91 + Math.random() * 7.8).toFixed(1);
-      setMatchPercent(score);
-
-      setTimeout(() => {
+      try {
+        const res = await verifyFaceApi({ image: base64Selfie });
+        const scoreVal = res.data?.data?.score;
+        const percentageScore = (scoreVal * 100).toFixed(1);
+        setMatchPercent(percentageScore);
         setScanStatus("success");
-        toast.success(`Face matched: ${score}% match!`);
-      }, 1200);
+        toast.success(`Face matched: ${percentageScore}% similarity!`);
+      } catch (err) {
+        setScanStatus("failed");
+        const errMsg = err.response?.data?.message || "Face matching failed. Please try again.";
+        toast.error(errMsg);
+      }
     } else {
       setScanStatus("failed");
       stopScanner();
