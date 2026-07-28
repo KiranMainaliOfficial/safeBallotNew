@@ -1,8 +1,13 @@
 import mongoose from 'mongoose';
-import crypto from 'crypto'; import Election from '../models/Election.model.js'; import Candidate from '../models/Candidate.model.js'; import Vote from '../models/Vote.model.js'; import VoterRegistry from '../models/VoterRegistry.model.js'; import Log from '../models/Log.model.js'; import { runFraudPipeline } from '../fraud/engine.js'; import { emitVoteUpdate } from '../sockets/voteSocket.js';
+import crypto from 'crypto'; import Election from '../models/Election.model.js'; import Candidate from '../models/Candidate.model.js'; import Vote from '../models/Vote.model.js'; import VoterRegistry from '../models/VoterRegistry.model.js'; import Log from '../models/Log.model.js'; import User from '../models/User.model.js'; import { runFraudPipeline } from '../fraud/engine.js'; import { emitVoteUpdate } from '../sockets/voteSocket.js';
 
 export async function castVote({ user, electionId, candidateId, meta, io }) {
     const session = await mongoose.startSession(); session.startTransaction(); try {
+        const dbUser = await User.findById(user.id).session(session);
+        if (!dbUser) throw Object.assign(new Error('User not found'), { status: 404 });
+        if (!dbUser.kycComplete) {
+            throw Object.assign(new Error('KYC not completed. You must complete KYC to vote.'), { status: 403 });
+        }
         const election = await Election.findById(electionId).session(session); if (!election) throw Object.assign(new Error('Election not found'), { status: 404 }); if (election.status !== 'active') { throw Object.assign(new Error('Election is not active'), { status: 400 }); } const now = Date.now(); if (now < election.startTime.getTime() || now > election.endTime.getTime()) { throw Object.assign(new Error('Election window is closed'), { status: 400 }); }
 
         const candidate = await Candidate.findOne({

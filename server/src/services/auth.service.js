@@ -18,6 +18,7 @@ export async function register({ name, email, phone, password, meta }) {
     }
     const passwordHash = await bcrypt.hash(password, 12);
     const otp = generateOtp();
+    console.log("OTP GENERATED FOR USER:", email, "->", otp);
     const user = await User.create({
         name,
         email,
@@ -29,8 +30,16 @@ export async function register({ name, email, phone, password, meta }) {
         deviceFingerprint: meta.deviceFingerprint,
     });
 
-    await sendOtp(email, otp);
-    await sendSms(phone, `Your SafeBallot verification code is: ${otp}`);
+    try {
+        await sendOtp(email, otp);
+    } catch (err) {
+        console.error("SMTP sending failed but proceeding:", err.message);
+    }
+    try {
+        await sendSms(phone, `Your SafeBallot verification code is: ${otp}`);
+    } catch (err) {
+        console.error("Twilio SMS sending failed but proceeding:", err.message);
+    }
     await Log.create({
         userId: user._id,
         action: 'REGISTER',
@@ -110,6 +119,38 @@ export async function login({ email, password, meta }) {
             name: user.name,
             email: user.email,
             role: user.role,
+            kycComplete: user.kycComplete || false,
         },
+    };
+}
+
+export async function submitKyc(userId, kycData, meta) {
+    const user = await User.findById(userId);
+    if (!user) {
+        throw Object.assign(new Error('User not found'), { status: 404 });
+    }
+
+    user.kycComplete = true;
+    user.kycData = {
+        ...kycData,
+        submittedAt: new Date(),
+    };
+
+    await user.save();
+
+    await Log.create({
+        userId: user._id,
+        action: 'KYC_SUBMIT',
+        ip: meta.ip,
+        deviceFingerprint: meta.deviceFingerprint,
+        userAgent: meta.userAgent,
+    });
+
+    return {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        kycComplete: user.kycComplete,
     };
 }

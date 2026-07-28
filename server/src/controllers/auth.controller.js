@@ -1,5 +1,6 @@
 import * as svc from '../services/auth.service.js';
 import { ok } from '../utils/response.js';
+import User from '../models/User.model.js';
 
 export const register = async (req, res, next) => {
     try {
@@ -37,4 +38,23 @@ export const login = async (req, res, next) => {
 export const logout = async (_req, res) => {
     res.clearCookie('refreshToken');
     ok(res, null, 'Logged out');
+};
+
+export const getMe = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.user.id).select('-passwordHash');
+        if (!user) throw Object.assign(new Error('User not found'), { status: 404 });
+        ok(res, user, 'Profile retrieved');
+    } catch (e) {
+        next(e);
+    }
+};
+
+export const submitKyc = async (req, res, next) => {
+    try {
+        const data = await svc.submitKyc(req.user.id, req.body, req.meta);
+        ok(res, data, 'KYC submitted');
+    } catch (e) {
+        next(e);
+    }
 };

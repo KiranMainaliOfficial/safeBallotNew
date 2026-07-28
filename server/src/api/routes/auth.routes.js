@@ -5,6 +5,7 @@ import {
     registerSchema,
     loginSchema,
     otpSchema,
+    kycSchema,
 } from '../../validators/auth.validator.js';
 import { loginLimiter } from '../../middleware/rateLimiter.middleware.js';
 import { captureMeta } from '../../middleware/captureMeta.middleware.js';
@@ -15,5 +16,7 @@ r.post('/register', captureMeta, validate(registerSchema), c.register);
 r.post('/verify-otp', validate(otpSchema), c.verifyOtp);
 r.post('/login', loginLimiter, captureMeta, validate(loginSchema), c.login);
 r.post('/logout', verifyJWT, c.logout);
+r.get('/me', verifyJWT, c.getMe);
+r.post('/kyc', verifyJWT, captureMeta, validate(kycSchema), c.submitKyc);
 
 export default r;

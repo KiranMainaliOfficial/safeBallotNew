@@ -18,12 +18,17 @@ app.use(
     cors({
         origin: [
             env.CLIENT_URL,
-            "http://192.168.1.69:5000"// this is for the mobile phones.
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:5175",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+            "http://192.168.1.69:5000"
         ],
         credentials: true,
     })
 );
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(morgan('combined'));

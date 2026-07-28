@@ -12,6 +12,8 @@ import ManageElections from "./pages/admin/ManageElections";
 import FraudReports from "./pages/admin/FraudReports";
 import PrivateRoute from "./routes/PrivateRoute";
 import AdminRoute from "./routes/AdminRoute";
+import KycPage from "./pages/KycPage";
+import MyDetails from "./pages/MyDetails";
 
 export default function App() {
   return (
@@ -30,6 +32,8 @@ export default function App() {
             <Route path="/elections" element={<Elections />} />{" "}
             <Route path="/vote/:id" element={<VotePage />} />{" "}
             <Route path="/results/:id" element={<Results />} />{" "}
+            <Route path="/kyc" element={<KycPage />} />{" "}
+            <Route path="/my-details" element={<MyDetails />} />{" "}
           </Route>
 
           <Route element={<AdminRoute />}>

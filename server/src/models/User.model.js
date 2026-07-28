@@ -13,6 +13,21 @@ const userSchema = new mongoose.Schema(
         isVerified: { type: Boolean, default: false },
         otpHash: String,
         otpExpires: Date, registeredIp: String, deviceFingerprint: String, failedLoginAttempts: { type: Number, default: 0 }, lockUntil: Date,
+        kycComplete: { type: Boolean, default: false },
+        kycData: {
+            selfie: String,
+            location: {
+                latitude: Number,
+                longitude: Number,
+            },
+            address: String,
+            nid: String,
+            phone: String,
+            fatherName: String,
+            grandfatherName: String,
+            declarationAccepted: { type: Boolean, default: false },
+            submittedAt: Date,
+        },
     }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

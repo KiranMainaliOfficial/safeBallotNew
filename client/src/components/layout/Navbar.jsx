@@ -26,12 +26,20 @@ export default function Navbar() {
 
         <nav className="flex items-center gap-4 text-sm">
           {token && (
-            <Link
-              to="/elections"
-              className="text-slate-600 hover:text-slate-900"
-            >
-              Elections
-            </Link>
+            <>
+              <Link
+                to="/elections"
+                className="text-slate-600 hover:text-slate-900"
+              >
+                Elections
+              </Link>
+              <Link
+                to="/my-details"
+                className="text-slate-600 hover:text-slate-900"
+              >
+                My Details
+              </Link>
+            </>
           )}
           <Link to="/verify" className="text-slate-600 hover:text-slate-900">
             Verify

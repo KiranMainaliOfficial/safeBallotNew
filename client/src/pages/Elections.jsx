@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listElectionsApi } from "../api/election.api";
+import { getMeApi } from "../api/auth.api";
+import { useAuth } from "../store/authStore";
 import Loader from "../components/common/Loader";
 import { fmtDate } from "../utils/formatters";
 
 export default function Elections() {
   const [items, setItems] = useState(null);
+  const { user, token, setAuth } = useAuth();
 
   useEffect(() => {
+    getMeApi()
+      .then((r) => {
+        setAuth(r.data.data, token);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch user profile", err);
+      });
+
     listElectionsApi()
       .then((r) => setItems(r.data.data))
       .catch(() => setItems([]));
@@ -18,6 +29,25 @@ export default function Elections() {
   return (
     <div className="p-4">
       <h3 className="text-2xl font-semibold mb-6">Elections</h3>
+
+      {!user?.kycComplete && (
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h4 className="text-amber-800 font-semibold text-base flex items-center gap-2">
+              ⚠️ KYC Verification Required
+            </h4>
+            <p className="text-amber-700 text-sm mt-1">
+              You must complete your KYC verification to be eligible for voting.
+            </p>
+          </div>
+          <Link
+            to="/kyc"
+            className="btn-primary !bg-amber-600 hover:!bg-amber-700 text-sm whitespace-nowrap self-start sm:self-center"
+          >
+            Complete KYC Now
+          </Link>
+        </div>
+      )}
       {items.length === 0 && (
         <div className="card text-slate-500 text-sm">
           No elections available right now.
@@ -48,12 +78,22 @@ export default function Elections() {
             </div>
             <div className="flex gap-2">
               {e.status === "active" && (
-                <Link
-                  to={`/vote/${e._id}`}
-                  className="btn-primary !py-1.5 !px-3 text-sm"
-                >
-                  Vote
-                </Link>
+                user?.kycComplete ? (
+                  <Link
+                    to={`/vote/${e._id}`}
+                    className="btn-primary !py-1.5 !px-3 text-sm"
+                  >
+                    Vote
+                  </Link>
+                ) : (
+                  <button
+                    disabled
+                    title="Complete KYC to vote"
+                    className="btn-primary !py-1.5 !px-3 text-sm opacity-50 cursor-not-allowed"
+                  >
+                    Vote
+                  </button>
+                )
               )}
               <Link
                 to={`/results/${e._id}`}
