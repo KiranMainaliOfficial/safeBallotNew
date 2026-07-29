@@ -21,6 +21,22 @@ export function verifyJWT(req, res, next) {
     }
 }
 
+export function verifyJWTOptional(req, res, next) {
+    const header = req.headers.authorization;
+    if (!header?.startsWith('Bearer ')) {
+        return next();
+    }
+    try {
+        const token = header.split(' ')[1];
+        req.user = verifyAccess(token);
+        next();
+    }
+    catch (error) {
+        // Continue without setting user if token is invalid/expired
+        next();
+    }
+}
+
 export const requireRole = (...roles) => (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
         return res.status(403).json({ success: false, message: 'Forbidden' });

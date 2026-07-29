@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as c from '../../controllers/election.controller.js';
-import { verifyJWT, requireRole } from '../../middleware/auth.middleware.js';
+import { verifyJWT, verifyJWTOptional, requireRole } from '../../middleware/auth.middleware.js';
 import { validate } from '../../middleware/validator.middleware.js';
 import { captureMeta } from '../../middleware/captureMeta.middleware.js';
 import {
@@ -10,8 +10,8 @@ import {
 } from '../../validators/election.validator.js';
 
 const r = Router();
-r.get('/', verifyJWT, c.list);
-r.get('/:id', verifyJWT, c.detail);
+r.get('/', verifyJWTOptional, c.list);
+r.get('/:id', verifyJWTOptional, c.detail);
 r.post(
     '/',
     verifyJWT,

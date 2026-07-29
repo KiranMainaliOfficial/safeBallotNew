@@ -25,11 +25,11 @@ export default function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-4">
-      <div className="card">
-        <h3 className="text-2xl font-semibold mb-1">Create account</h3>
+    <div className="max-w-6xl mx-auto px-4 py-16 flex justify-center">
+      <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm max-w-md w-full">
+        <h3 className="text-2xl font-extrabold text-[#0B3C95] mb-1">Create Account</h3>
         <p className="text-sm text-slate-500 mb-6">
-          Join SafeBallot to vote securely
+          Join Safe Ballot to vote securely
         </p>
         <form onSubmit={submit} className="space-y-4">
           <Input
@@ -61,13 +61,13 @@ export default function Register() {
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating…" : "Create account"}
+          <Button type="submit" disabled={loading} className="w-full !bg-[#0B3C95] hover:!bg-[#072C70] py-3 text-sm">
+            {loading ? "Creating…" : "Create Account"}
           </Button>
         </form>
-        <p className="text-sm text-slate-500 mt-4">
+        <p className="text-sm text-slate-500 mt-6 pt-4 border-t border-slate-100">
           Already have an account?{" "}
-          <Link to="/login" className="text-brand-600 font-medium">
+          <Link to="/login" className="text-[#0B3C95] font-bold hover:underline">
             Sign in
           </Link>
         </p>

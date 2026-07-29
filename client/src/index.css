@@ -31,3 +31,25 @@ body,
 .card {
   @apply bg-white rounded-2xl shadow-sm border border-slate-100 p-6;
 }
+
+.bg-warm-sand {
+  background-color: #F0EFEA;
+}
+
+.bg-warm-canvas {
+  background-color: #F4F3ED;
+}
+
+.bg-warm-white {
+  background-color: #F9F9F6;
+}
+
+.border-warm {
+  border-color: #E5E4DE;
+}
+
+/* Micro-animations */
+.hover-lift {
+  @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md;
+}
+

@@ -19,7 +19,14 @@ export default function Login() {
       const { data } = await loginApi(form);
       setAuth(data.data.user, data.data.accessToken);
       toast.success("Welcome back");
-      nav(data.data.user.role === "admin" ? "/admin" : "/elections");
+      
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get("redirect");
+      if (redirectTo) {
+        nav(redirectTo);
+      } else {
+        nav(data.data.user.role === "admin" ? "/admin" : "/elections");
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     } finally {
@@ -28,45 +35,38 @@ export default function Login() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16 p-4">
-      {" "}
-      <div className="card">
-        {" "}
-        <h3 className="text-2xl font-semibold mb-1">Sign in</h3>{" "}
+    <div className="max-w-6xl mx-auto px-4 py-16 flex justify-center">
+      <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm max-w-md w-full">
+        <h3 className="text-2xl font-extrabold text-[#0B3C95] mb-1">Sign In</h3>
         <p className="text-sm text-slate-500 mb-6">
-          {" "}
-          Access your SafeBallot account{" "}
-        </p>{" "}
+          Access your secure Safe Ballot account
+        </p>
         <form onSubmit={submit} className="space-y-4">
-          {" "}
           <Input
             label="Email"
             type="email"
             required
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />{" "}
+          />
           <Input
             label="Password"
             type="password"
             required
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />{" "}
-          <Button type="submit" disabled={loading} className="w-full">
-            {" "}
-            {loading ? "Signing in…" : "Sign in"}{" "}
-          </Button>{" "}
-        </form>{" "}
-        <p className="text-sm text-slate-500 mt-4">
-          {" "}
+          />
+          <Button type="submit" disabled={loading} className="w-full !bg-[#0B3C95] hover:!bg-[#072C70] py-3 text-sm">
+            {loading ? "Signing in…" : "Sign In"}
+          </Button>
+        </form>
+        <p className="text-sm text-slate-500 mt-6 pt-4 border-t border-slate-100">
           New here?{" "}
-          <Link to="/register" className="text-brand-600 font-medium">
-            {" "}
-            Create an account{" "}
-          </Link>{" "}
-        </p>{" "}
-      </div>{" "}
+          <Link to="/register" className="text-[#0B3C95] font-bold hover:underline">
+            Create an account
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }

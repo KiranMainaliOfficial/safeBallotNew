@@ -4,9 +4,9 @@ export default {
     extend: {
       colors: {
         brand: {
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
+          500: '#1E5CD9',
+          600: '#0B3C95',
+          700: '#072C70',
         },
       },
       fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },

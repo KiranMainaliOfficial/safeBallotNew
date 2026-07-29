@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VerifyOtp from "./pages/VerifyOtp";
@@ -17,11 +18,11 @@ import MyDetails from "./pages/MyDetails";
 
 export default function App() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col bg-[#F9F9F6]">
       <Navbar />
-      <main className="max-w-6xl mx-auto">
+      <main className="w-full flex-grow">
         <Routes>
-          <Route path="/" element={<Navigate to="/elections" />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />

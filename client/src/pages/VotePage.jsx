@@ -12,7 +12,10 @@ export default function VotePage() {
   const { id } = useParams();
   const nav = useNavigate();
   const [election, setElection] = useState(null);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("candidate") || null;
+  });
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [scanStatus, setScanStatus] = useState("idle"); // 'idle', 'camera_request', 'scanning', 'comparing', 'success', 'failed'

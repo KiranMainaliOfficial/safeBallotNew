@@ -10,6 +10,7 @@ pip install -r requirements.txt
 To run the application
 
 select the env: venv\Scripts\activate.bat
+..\server\venv\Scripts\activate.bat
 
 uvicorn main:app --reload --host [IP_ADDRESS] --port 8000 --reload-dir .
 
