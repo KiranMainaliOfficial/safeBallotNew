@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocket } from "../../hooks/useSocket";
 import BarChart from "../../components/charts/BarChart";
-import { listElectionsApi, setStatusApi, deleteElectionApi } from "../../api/election.api";
+import { listElectionsApi, getElectionApi, setStatusApi, deleteElectionApi } from "../../api/election.api";
+import { dashboardStatsApi } from "../../api/admin.api";
 
 export default function AdminDashboard() {
   const socket = useSocket();
@@ -12,28 +13,76 @@ export default function AdminDashboard() {
   const [alerts, setAlerts] = useState([]);
   const [activity, setActivity] = useState([]);
   const [elections, setElections] = useState([]);
+  const [selectedElectionId, setSelectedElectionId] = useState("");
+  const [stats, setStats] = useState({ totalVoters: 0, totalVotes: 0, activeElections: 0 });
+
+  const selectedElectionIdRef = useRef(selectedElectionId);
+  useEffect(() => {
+    selectedElectionIdRef.current = selectedElectionId;
+  }, [selectedElectionId]);
+
+  const loadDashboardStats = () => {
+    dashboardStatsApi()
+      .then((r) => {
+        const data = r.data.data;
+        setStats({
+          totalVoters: data.totalVoters,
+          totalVotes: data.totalVotes,
+          activeElections: data.activeElections
+        });
+        setActivity(data.activity);
+        setAlerts(data.alerts);
+      })
+      .catch(() => {});
+  };
+
+  const loadElectionTally = (electionId) => {
+    if (!electionId) return;
+    getElectionApi(electionId)
+      .then((r) => {
+        const candList = r.data.data?.candidates || [];
+        setTally(candList.map(c => ({ name: c.name, voteCount: c.voteCount })));
+      })
+      .catch(() => setTally([]));
+  };
 
   const loadElections = () => {
     listElectionsApi()
-      .then((r) => setElections(r.data.data))
+      .then((r) => {
+        const list = r.data.data || [];
+        setElections(list);
+        if (list.length > 0 && !selectedElectionIdRef.current) {
+          const activeElection = list.find(e => e.status === "active");
+          const defaultId = activeElection ? activeElection._id : list[0]._id;
+          setSelectedElectionId(defaultId);
+        }
+      })
       .catch(() => setElections([]));
   };
 
   useEffect(() => {
+    loadDashboardStats();
     loadElections();
   }, []);
 
   useEffect(() => {
+    if (selectedElectionId) {
+      loadElectionTally(selectedElectionId);
+    }
+  }, [selectedElectionId]);
+
+  useEffect(() => {
     if (!socket.current) return;
     socket.current.on("vote:new", (payload) => {
-      setTally(payload.tally);
-      setActivity((p) =>
-        [{ ts: payload.ts, electionId: payload.electionId }, ...p].slice(0, 10),
-      );
+      if (payload.electionId === selectedElectionIdRef.current) {
+        setTally(payload.tally);
+      }
+      loadDashboardStats();
     });
-    socket.current.on("fraud:alert", (r) =>
-      setAlerts((p) => [r, ...p].slice(0, 20)),
-    );
+    socket.current.on("fraud:alert", (r) => {
+      setAlerts((p) => [r, ...p].slice(0, 20));
+      loadDashboardStats();
+    });
   }, [socket.current]);
 
   const handleStatusChange = async (id, status) => {
@@ -41,6 +90,7 @@ export default function AdminDashboard() {
       await setStatusApi(id, status);
       toast.success(`Status updated to ${status}`);
       loadElections();
+      loadDashboardStats();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update status");
     }
@@ -52,6 +102,7 @@ export default function AdminDashboard() {
       await deleteElectionApi(id);
       toast.success("Election deleted");
       loadElections();
+      loadDashboardStats();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete");
     }
@@ -93,6 +144,31 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
+      {/* Real-time DB Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="card p-6 bg-white border border-slate-100 flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Registered Voters</span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="text-3xl font-extrabold text-slate-800">{stats.totalVoters}</span>
+            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold">Live DB</span>
+          </div>
+        </div>
+        <div className="card p-6 bg-white border border-slate-100 flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Votes Cast</span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="text-3xl font-extrabold text-[#0B3C95]">{stats.totalVotes}</span>
+            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-semibold">Verified</span>
+          </div>
+        </div>
+        <div className="card p-6 bg-white border border-slate-100 flex flex-col justify-between">
+          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Elections</span>
+          <div className="flex items-baseline justify-between mt-2">
+            <span className="text-3xl font-extrabold text-emerald-700">{stats.activeElections}</span>
+            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold">Ongoing</span>
+          </div>
+        </div>
+      </div>
+
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
@@ -131,9 +207,24 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="card lg:col-span-2">
-          <h4 className="font-semibold mb-4">Live Vote Count</h4>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h4 className="font-semibold text-slate-800">Live Vote Count</h4>
+            {elections.length > 0 && (
+              <select
+                value={selectedElectionId}
+                onChange={(e) => setSelectedElectionId(e.target.value)}
+                className="input py-1.5 px-3 text-xs max-w-xs font-semibold border-slate-200 bg-white"
+              >
+                {elections.map((el) => (
+                  <option key={el._id} value={el._id}>
+                    {el.title} ({el.status})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
           {tally.length === 0 ? (
-            <p className="text-sm text-slate-400">Waiting for votes…</p>
+            <p className="text-sm text-slate-400">No candidates configured or waiting for votes…</p>
           ) : (
             <BarChart
               labels={tally.map((c) => c.name)}
@@ -175,7 +266,7 @@ export default function AdminDashboard() {
             <ul className="text-sm divide-y divide-slate-100">
               {activity.map((a, i) => (
                 <li key={i} className="py-2 flex justify-between">
-                  <span className="font-mono text-xs">{a.electionId}</span>
+                  <span className="font-medium text-slate-700">{a.electionTitle}</span>
                   <span className="text-slate-400">
                     {new Date(a.ts).toLocaleTimeString()}
                   </span>

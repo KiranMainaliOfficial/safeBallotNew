@@ -75,3 +75,39 @@ export async function deleteElection(id) {
     if (!deleted) throw Object.assign(new Error('Election not found'), { status: 404 });
     return deleted;
 }
+
+export async function updateCandidate(electionId, candidateId, data) {
+    const candidate = await Candidate.findOne({ _id: candidateId, electionId });
+    if (!candidate) {
+        throw Object.assign(new Error('Candidate not found'), { status: 404 });
+    }
+
+    let photoUrl = candidate.photoUrl;
+    let partySymbolUrl = candidate.partySymbolUrl;
+
+    if (data.photo) {
+        photoUrl = await uploadToImageKit(data.photo, `candidate_${electionId}_${Date.now()}.jpg`);
+    }
+    if (data.partySymbol) {
+        partySymbolUrl = await uploadToImageKit(data.partySymbol, `symbol_${electionId}_${Date.now()}.jpg`);
+    }
+
+    candidate.name = data.name !== undefined ? data.name : candidate.name;
+    candidate.party = data.party !== undefined ? data.party : candidate.party;
+    candidate.bio = data.bio !== undefined ? data.bio : candidate.bio;
+    candidate.nid = data.nid !== undefined ? data.nid : candidate.nid;
+    if (data.photo) candidate.photoUrl = photoUrl;
+    if (data.partySymbol) candidate.partySymbolUrl = partySymbolUrl;
+
+    await candidate.save();
+    return candidate;
+}
+
+export async function deleteCandidate(electionId, candidateId) {
+    const candidate = await Candidate.findOneAndDelete({ _id: candidateId, electionId });
+    if (!candidate) {
+        throw Object.assign(new Error('Candidate not found'), { status: 404 });
+    }
+    await Vote.deleteMany({ candidateId });
+    return candidate;
+}

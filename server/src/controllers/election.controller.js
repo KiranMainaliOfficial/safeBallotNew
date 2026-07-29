@@ -60,3 +60,21 @@ export const remove = async (req, res, next) => {
         next(e);
     }
 };
+
+export const updateCandidate = async (req, res, next) => {
+    try {
+        const data = await svc.updateCandidate(req.params.id, req.params.candidateId, req.body);
+        ok(res, data, 'Candidate updated');
+    } catch (e) {
+        next(e);
+    }
+};
+
+export const deleteCandidate = async (req, res, next) => {
+    try {
+        const data = await svc.deleteCandidate(req.params.id, req.params.candidateId);
+        ok(res, data, 'Candidate deleted');
+    } catch (e) {
+        next(e);
+    }
+};

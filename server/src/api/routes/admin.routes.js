@@ -6,5 +6,6 @@ const r = Router();
 r.get('/fraud', verifyJWT, requireRole('admin', 'auditor'), c.listFraud);
 r.patch('/fraud/:id', verifyJWT, requireRole('admin'), c.updateFraud);
 r.get('/logs', verifyJWT, requireRole('admin', 'auditor'), c.listLogs);
+r.get('/stats', verifyJWT, requireRole('admin', 'auditor'), c.getDashboardStats);
 
 export default r;

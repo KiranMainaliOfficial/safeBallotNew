@@ -11,4 +11,8 @@ export const deleteElectionApi = (id) =>
     api.delete(`/elections/${id}`);
 export const addCandidateApi = (id, payload) =>
     api.post(`/elections/${id}/candidates`, payload);
+export const updateCandidateApi = (electionId, candidateId, payload) =>
+    api.put(`/elections/${electionId}/candidates/${candidateId}`, payload);
+export const deleteCandidateApi = (electionId, candidateId) =>
+    api.delete(`/elections/${electionId}/candidates/${candidateId}`);
 export const resultsApi = (id) => api.get(`/votes/results/${id}`);

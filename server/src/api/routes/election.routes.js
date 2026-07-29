@@ -47,5 +47,18 @@ r.post(
     validate(candidateSchema),
     c.addCandidate
 );
+r.put(
+    '/:id/candidates/:candidateId',
+    verifyJWT,
+    requireRole('admin'),
+    validate(candidateSchema),
+    c.updateCandidate
+);
+r.delete(
+    '/:id/candidates/:candidateId',
+    verifyJWT,
+    requireRole('admin'),
+    c.deleteCandidate
+);
 
 export default r;
