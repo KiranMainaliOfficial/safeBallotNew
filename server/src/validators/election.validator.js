@@ -11,7 +11,11 @@ export const candidateSchema = Joi.object({
     name: Joi.string().min(2).max(120).required(),
     party: Joi.string().max(120).allow(''),
     bio: Joi.string().max(1000).allow(''),
-    photoUrl: Joi.string().uri().allow(''),
+    nid: Joi.string().min(5).max(30).required(),
+    photo: Joi.string().allow('').optional(),
+    partySymbol: Joi.string().allow('').optional(),
+    photoUrl: Joi.string().uri().allow('').optional(),
+    partySymbolUrl: Joi.string().uri().allow('').optional(),
 });
 
 export const statusSchema = Joi.object({

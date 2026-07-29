@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { fraudListApi, updateFraudApi } from "../../api/admin.api";
 import Loader from "../../components/common/Loader";
@@ -6,6 +7,7 @@ import { fmtDate } from "../../utils/formatters";
 
 export default function FraudReports() {
   const [items, setItems] = useState(null);
+  const location = useLocation();
 
   const load = () =>
     fraudListApi()
@@ -36,8 +38,43 @@ export default function FraudReports() {
         : "bg-slate-100 text-slate-600";
 
   return (
-    <div className="p-4">
-      <h3 className="text-2xl font-semibold mb-6">Fraud Reports</h3>
+    <div className="p-4 space-y-6">
+      {/* Admin Navigation */}
+      <div className="flex gap-6 border-b border-slate-200 pb-3">
+        <Link
+          to="/admin"
+          className={`text-sm font-semibold pb-1 transition-all ${
+            location.pathname === "/admin"
+              ? "text-[#0B3C95] border-b-2 border-[#0B3C95] font-bold"
+              : "text-slate-500 hover:text-[#0B3C95]"
+          }`}
+        >
+          Live Dashboard
+        </Link>
+        <Link
+          to="/admin/elections"
+          className={`text-sm font-semibold pb-1 transition-all ${
+            location.pathname === "/admin/elections"
+              ? "text-[#0B3C95] border-b-2 border-[#0B3C95] font-bold"
+              : "text-slate-500 hover:text-[#0B3C95]"
+          }`}
+        >
+          Manage Elections
+        </Link>
+        <Link
+          to="/admin/fraud"
+          className={`text-sm font-semibold pb-1 transition-all ${
+            location.pathname === "/admin/fraud"
+              ? "text-[#0B3C95] border-b-2 border-[#0B3C95] font-bold"
+              : "text-slate-500 hover:text-[#0B3C95]"
+          }`}
+        >
+          Fraud Reports
+        </Link>
+      </div>
+
+      <div>
+        <h3 className="text-2xl font-semibold mb-6">Fraud Reports</h3>
       {items.length === 0 && (
         <div className="card text-slate-500 text-sm">No reports.</div>
       )}
@@ -93,6 +130,7 @@ export default function FraudReports() {
             </pre>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );

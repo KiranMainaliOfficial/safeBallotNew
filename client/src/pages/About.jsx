@@ -6,7 +6,7 @@ export default function About() {
       {/* Header section */}
       <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
         <span className="text-xs uppercase font-extrabold tracking-wider bg-blue-50 text-[#0B3C95] border border-blue-100 px-3 py-1 rounded-full">
-          BCA 8th Semester Project
+          BCA - MMAMC 8th Sem Project
         </span>
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
           About the Creators
@@ -32,7 +32,7 @@ export default function About() {
             Designed the cryptographic token verification logic, managed MongoDB database optimization, and trained the facial recognition system integration for secure voter authentication.
           </p>
           <div className="pt-4 border-t border-slate-100 flex justify-center gap-4 text-xs font-semibold text-slate-400">
-            <span>BCA Program</span>
+            <span>BCA - MMAMC</span>
             <span>·</span>
             <span>8th Semester</span>
           </div>
@@ -51,7 +51,7 @@ export default function About() {
             Crafted the responsive user experience, designed the high-fidelity component layouts, and engineered the secure email/SMS OTP notification engine.
           </p>
           <div className="pt-4 border-t border-slate-100 flex justify-center gap-4 text-xs font-semibold text-slate-400">
-            <span>BCA Program</span>
+            <span>BCA - MMAMC</span>
             <span>·</span>
             <span>8th Semester</span>
           </div>

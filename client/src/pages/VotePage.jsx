@@ -132,7 +132,16 @@ export default function VotePage() {
         candidateId: selected,
       });
       toast.success("Vote recorded");
-      sessionStorage.setItem(`receipt:${id}`, JSON.stringify(data.data));
+      const candidateObj = election.candidates.find((c) => c._id === selected);
+      const receiptData = {
+        receiptId: data.data.receiptId,
+        voteHash: data.data.voteHash,
+        electionTitle: election.title,
+        candidateName: candidateObj ? candidateObj.name : "Unknown",
+        candidateParty: candidateObj ? candidateObj.party : "",
+        timestamp: new Date().toLocaleString(),
+      };
+      sessionStorage.setItem(`receipt:${id}`, JSON.stringify(receiptData));
       nav(`/results/${id}`);
     } catch (err) {
       toast.error(err.response?.data?.message || "Vote failed");
@@ -153,23 +162,49 @@ export default function VotePage() {
           {election.candidates.map((c) => (
             <label
               key={c._id}
-              className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition ${
+              className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${
                 selected === c._id
                   ? "border-brand-500 bg-brand-500/5"
                   : "border-slate-200 hover:border-slate-300"
               }`}
             >
-              <input
-                type="radio"
-                name="cand"
-                className="accent-brand-600"
-                checked={selected === c._id}
-                onChange={() => setSelected(c._id)}
-              />
-              <div>
-                <p className="font-medium">{c.name}</p>
-                {c.party && <p className="text-xs text-slate-500">{c.party}</p>}
+              <div className="flex items-center gap-4">
+                <input
+                  type="radio"
+                  name="cand"
+                  className="accent-brand-600"
+                  checked={selected === c._id}
+                  onChange={() => setSelected(c._id)}
+                />
+                
+                {/* Candidate Photo */}
+                <div className="w-12 h-12 rounded-full overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center flex-shrink-0">
+                  {c.photoUrl ? (
+                    <img src={c.photoUrl} alt={c.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-slate-400 font-bold text-sm">
+                      {c.name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <p className="font-semibold text-slate-800">{c.name}</p>
+                  <p className="text-xs text-slate-500">NID: {c.nid ? c.nid.slice(0, -4) + "****" : "—"}</p>
+                  {c.party && (
+                    <p className="text-xs text-[#0B3C95] font-medium mt-0.5">
+                      {c.party}
+                    </p>
+                  )}
+                </div>
               </div>
+
+              {/* Party Symbol sign */}
+              {c.partySymbolUrl && (
+                <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-100 p-1 bg-white flex items-center justify-center flex-shrink-0" title={`${c.party} Symbol`}>
+                  <img src={c.partySymbolUrl} alt="Party symbol" className="w-full h-full object-contain" />
+                </div>
+              )}
             </label>
           ))}
         </div>

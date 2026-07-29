@@ -54,10 +54,11 @@ export default function Register() {
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
           />
           <Input
-            label="Password"
+            label="Password (must be more than 6 characters)"
             type="password"
             required
-            minLength={8}
+            pattern="^.{7,}$"
+            title="Password must be more than 6 characters"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />

@@ -42,3 +42,12 @@ export const addCandidate = async (req, res, next) => {
         next(e);
     }
 };
+
+export const update = async (req, res, next) => {
+    try {
+        const data = await svc.updateElection(req.params.id, req.body);
+        ok(res, data, 'Election updated');
+    } catch (e) {
+        next(e);
+    }
+};

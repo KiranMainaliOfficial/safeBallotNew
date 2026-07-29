@@ -27,6 +27,13 @@ r.patch(
     validate(statusSchema),
     c.setStatus
 );
+r.put(
+    '/:id',
+    verifyJWT,
+    requireRole('admin'),
+    validate(createElectionSchema),
+    c.update
+);
 r.post(
     '/:id/candidates',
     verifyJWT,

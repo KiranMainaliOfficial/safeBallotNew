@@ -1,6 +1,7 @@
 import Election from '../models/Election.model.js';
 import Candidate from '../models/Candidate.model.js';
 import Log from '../models/Log.model.js';
+import { uploadToImageKit } from '../config/imagekit.js';
 
 export async function createElection(data, adminId, meta) {
     const e = await Election.create({ ...data, createdBy: adminId });
@@ -39,5 +40,29 @@ export async function updateStatus(id, status) {
 }
 
 export async function addCandidate(electionId, data) {
-    return Candidate.create({ ...data, electionId });
+    let photoUrl = data.photoUrl || '';
+    let partySymbolUrl = data.partySymbolUrl || '';
+    
+    if (data.photo) {
+        photoUrl = await uploadToImageKit(data.photo, `candidate_${electionId}_${Date.now()}.jpg`);
+    }
+    if (data.partySymbol) {
+        partySymbolUrl = await uploadToImageKit(data.partySymbol, `symbol_${electionId}_${Date.now()}.jpg`);
+    }
+
+    return Candidate.create({
+        electionId,
+        name: data.name,
+        party: data.party || '',
+        bio: data.bio || '',
+        nid: data.nid,
+        photoUrl,
+        partySymbolUrl,
+    });
+}
+
+export async function updateElection(id, data) {
+    const updated = await Election.findByIdAndUpdate(id, data, { new: true });
+    if (!updated) throw Object.assign(new Error('Election not found'), { status: 404 });
+    return updated;
 }

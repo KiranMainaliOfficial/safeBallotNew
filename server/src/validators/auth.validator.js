@@ -6,7 +6,9 @@ export const registerSchema = Joi.object({
     phone: Joi.string().pattern(/^\+?[1-9]\d{1,14}$/).required().messages({
         'string.pattern.base': 'Phone number must be in international format (e.g. +1234567890)'
     }),
-    password: Joi.string().min(8).max(128).required(),
+    password: Joi.string().pattern(/^.{7,}$/).required().messages({
+        'string.pattern.base': 'Password must be more than 6 characters'
+    }),
 });
 
 export const otpSchema = Joi.object({

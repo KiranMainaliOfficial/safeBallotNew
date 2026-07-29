@@ -11,7 +11,9 @@ const candidateSchema = new mongoose.Schema(
         name: { type: String, required: true, trim: true },
         party: { type: String, default: '' },
         bio: { type: String, default: '' },
+        nid: { type: String, required: true },
         photoUrl: { type: String, default: '' },
+        partySymbolUrl: { type: String, default: '' },
         voteCount: { type: Number, default: 0 },
     },
     { timestamps: true }
