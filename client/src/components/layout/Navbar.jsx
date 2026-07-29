@@ -66,7 +66,12 @@ export default function Navbar() {
             Elections
           </button>
 
-          <span className="opacity-50 cursor-default">Help</span>
+          <Link
+            to="/about"
+            className="hover:text-white transition"
+          >
+            About Project
+          </Link>
         </nav>
 
         {/* Auth Action Area */}
