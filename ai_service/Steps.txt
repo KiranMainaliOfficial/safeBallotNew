@@ -1,0 +1,16 @@
+To create the Virtual Environment of the python 
+python -m venv myenv
+
+To activate the Virtual Environment of the python 
+myenv\Scripts\activate.bat
+
+To install the dependencies
+pip install -r requirements.txt
+
+To run the application
+
+select the env: venv\Scripts\activate.bat
+
+uvicorn main:app --reload --host [IP_ADDRESS] --port 8000 --reload-dir .
+
+uvicorn main:app --reload --port 8000     ->for this project (from the ai_service folder)
