@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSocket } from "../../hooks/useSocket";
 import BarChart from "../../components/charts/BarChart";
-import { listElectionsApi, setStatusApi } from "../../api/election.api";
+import { listElectionsApi, setStatusApi, deleteElectionApi } from "../../api/election.api";
 
 export default function AdminDashboard() {
   const socket = useSocket();
@@ -43,6 +43,17 @@ export default function AdminDashboard() {
       loadElections();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update status");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this election? All candidates and votes will be permanently removed.")) return;
+    try {
+      await deleteElectionApi(id);
+      toast.success("Election deleted");
+      loadElections();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete");
     }
   };
 
@@ -231,6 +242,12 @@ export default function AdminDashboard() {
                         Close
                       </button>
                     )}
+                    <button
+                      onClick={() => handleDelete(e._id)}
+                      className="text-xs px-2.5 py-1 rounded bg-rose-100 text-rose-700 hover:bg-rose-200 font-semibold transition"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </div>

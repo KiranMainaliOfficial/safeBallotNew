@@ -7,6 +7,8 @@ export const setStatusApi = (id, status) =>
     api.patch(`/elections/${id}/status`, { status });
 export const updateElectionApi = (id, payload) =>
     api.put(`/elections/${id}`, payload);
+export const deleteElectionApi = (id) =>
+    api.delete(`/elections/${id}`);
 export const addCandidateApi = (id, payload) =>
     api.post(`/elections/${id}/candidates`, payload);
 export const resultsApi = (id) => api.get(`/votes/results/${id}`);

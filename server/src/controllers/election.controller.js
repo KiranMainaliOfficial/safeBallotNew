@@ -51,3 +51,12 @@ export const update = async (req, res, next) => {
         next(e);
     }
 };
+
+export const remove = async (req, res, next) => {
+    try {
+        const data = await svc.deleteElection(req.params.id);
+        ok(res, data, 'Election deleted');
+    } catch (e) {
+        next(e);
+    }
+};

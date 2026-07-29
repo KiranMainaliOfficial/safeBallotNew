@@ -7,6 +7,7 @@ import {
   setStatusApi,
   addCandidateApi,
   updateElectionApi,
+  deleteElectionApi,
 } from "../../api/election.api";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
@@ -81,6 +82,17 @@ export default function ManageElections() {
       load();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this election? All candidates and votes will be permanently removed.")) return;
+    try {
+      await deleteElectionApi(id);
+      toast.success("Election deleted");
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete");
     }
   };
 
@@ -241,6 +253,12 @@ export default function ManageElections() {
                     Close
                   </button>
                 )}
+                <button
+                  onClick={() => handleDelete(e._id)}
+                  className="text-xs px-3 py-1 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 transition"
+                >
+                  Delete
+                </button>
               </div>
             </div>
 

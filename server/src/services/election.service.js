@@ -1,6 +1,7 @@
 import Election from '../models/Election.model.js';
 import Candidate from '../models/Candidate.model.js';
 import Log from '../models/Log.model.js';
+import Vote from '../models/Vote.model.js';
 import { uploadToImageKit } from '../config/imagekit.js';
 
 export async function createElection(data, adminId, meta) {
@@ -65,4 +66,12 @@ export async function updateElection(id, data) {
     const updated = await Election.findByIdAndUpdate(id, data, { new: true });
     if (!updated) throw Object.assign(new Error('Election not found'), { status: 404 });
     return updated;
+}
+
+export async function deleteElection(id) {
+    await Candidate.deleteMany({ electionId: id });
+    await Vote.deleteMany({ electionId: id });
+    const deleted = await Election.findByIdAndDelete(id);
+    if (!deleted) throw Object.assign(new Error('Election not found'), { status: 404 });
+    return deleted;
 }

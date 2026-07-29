@@ -34,6 +34,12 @@ r.put(
     validate(createElectionSchema),
     c.update
 );
+r.delete(
+    '/:id',
+    verifyJWT,
+    requireRole('admin'),
+    c.remove
+);
 r.post(
     '/:id/candidates',
     verifyJWT,
