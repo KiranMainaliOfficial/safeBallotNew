@@ -72,6 +72,13 @@ export default function Navbar() {
           >
             About Project
           </Link>
+
+          <Link
+            to="/contact"
+            className="hover:text-white transition"
+          >
+            Contact Us
+          </Link>
         </nav>
 
         {/* Auth Action Area */}

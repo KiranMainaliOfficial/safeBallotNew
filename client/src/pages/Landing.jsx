@@ -18,6 +18,53 @@ export default function Landing() {
   const [selectedCandidate, setSelectedCandidate] = useState("");
   const [submittingWidget, setSubmittingWidget] = useState(false);
 
+  // Sorting state for active ballots
+  const [sortOrder, setSortOrder] = useState("endTimeAsc");
+
+  // How It Works Simulator State
+  const [activeStep, setActiveStep] = useState(1);
+  const [scanningProgress, setScanningProgress] = useState(0);
+  const [isScanning, setIsScanning] = useState(false);
+  const [demoSelectedCandidate, setDemoSelectedCandidate] = useState("Dr. Rivera");
+  const [isEncrypting, setIsEncrypting] = useState(false);
+  const [encryptedHash, setEncryptedHash] = useState("");
+
+  const triggerScan = () => {
+    setScanningProgress(0);
+    setIsScanning(true);
+  };
+
+  useEffect(() => {
+    let interval;
+    if (isScanning) {
+      interval = setInterval(() => {
+        setScanningProgress((prev) => {
+          if (prev >= 100) {
+            setIsScanning(false);
+            clearInterval(interval);
+            return 100;
+          }
+          return prev + 10;
+        });
+      }, 150);
+    }
+    return () => clearInterval(interval);
+  }, [isScanning]);
+
+  useEffect(() => {
+    if (activeStep === 1) {
+      triggerScan();
+    }
+  }, [activeStep]);
+
+  const handleDemoEncrypt = () => {
+    setIsEncrypting(true);
+    setTimeout(() => {
+      setIsEncrypting(false);
+      setEncryptedHash("a89f81d1c3a640192e21b72dc64b18c21a4fbd3d9e84b72c918a22129e19d7d2");
+    }, 1500);
+  };
+
   useEffect(() => {
     // Scroll to top on mount
     window.scrollTo(0, 0);
@@ -128,6 +175,19 @@ export default function Landing() {
       return loc === "Los Angeles, CA" || loc === "California";
     }
     return loc === locationFilter;
+  });
+
+  const sortedElections = [...filteredElections].sort((a, b) => {
+    if (sortOrder === "endTimeAsc") {
+      return new Date(a.endTime) - new Date(b.endTime);
+    }
+    if (sortOrder === "startTimeDesc") {
+      return new Date(b.startTime) - new Date(a.startTime);
+    }
+    if (sortOrder === "startTimeAsc") {
+      return new Date(a.startTime) - new Date(b.startTime);
+    }
+    return 0;
   });
 
   return (
@@ -283,6 +343,27 @@ export default function Landing() {
 
       {/* 3. HOW IT WORKS SECTION */}
       <section id="how-it-works" className="bg-[#F9F9F6] py-16 px-4 md:px-8">
+        <style>{`
+          @keyframes scan-beam {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+          }
+          @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+          }
+          .animate-scan-beam {
+            position: absolute;
+            left: 0;
+            right: 0;
+            h-1;
+            animation: scan-beam 2s infinite ease-in-out;
+          }
+          .animate-bounce-subtle {
+            animation: bounce-subtle 1.5s infinite ease-in-out;
+          }
+        `}</style>
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
             <div>
@@ -296,56 +377,304 @@ export default function Landing() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
             
-            {/* Step 1 */}
-            <div className="bg-white border border-[#E5E4DE] rounded-2xl p-6 relative hover-lift">
-              <div className="absolute top-6 right-6 text-2xl font-bold text-slate-200">01</div>
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0B3C95] grid place-items-center mb-6">
-                👤
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Verify Your Identity</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Enter your voter ID and complete a secure biometric check. Takes under 2 minutes.
-              </p>
+            {/* Left side: Interactive vertical timeline */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+              
+              {/* Step 1 */}
+              <button
+                onClick={() => setActiveStep(1)}
+                className={`w-full text-left p-5 rounded-2xl border transition-all duration-200 flex gap-4 ${
+                  activeStep === 1
+                    ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10"
+                    : "bg-[#F3F3EF]/50 hover:bg-[#F3F3EF] border-transparent"
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  activeStep === 1 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  1
+                </span>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">Verify Identity</h4>
+                  <p className="text-xs text-slate-500 mt-1">Provide voter credentials and perform an automatic face biometric verification.</p>
+                </div>
+              </button>
+
+              {/* Step 2 */}
+              <button
+                onClick={() => setActiveStep(2)}
+                className={`w-full text-left p-5 rounded-2xl border transition-all duration-200 flex gap-4 ${
+                  activeStep === 2
+                    ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10"
+                    : "bg-[#F3F3EF]/50 hover:bg-[#F3F3EF] border-transparent"
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  activeStep === 2 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  2
+                </span>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">Review Ballot</h4>
+                  <p className="text-xs text-slate-500 mt-1">Browse races and interactively select your preferred candidates.</p>
+                </div>
+              </button>
+
+              {/* Step 3 */}
+              <button
+                onClick={() => setActiveStep(3)}
+                className={`w-full text-left p-5 rounded-2xl border transition-all duration-200 flex gap-4 ${
+                  activeStep === 3
+                    ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10"
+                    : "bg-[#F3F3EF]/50 hover:bg-[#F3F3EF] border-transparent"
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  activeStep === 3 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  3
+                </span>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">Cast & Encrypt</h4>
+                  <p className="text-xs text-slate-500 mt-1">Submit your ballot and see how it gets transformed into an encrypted SHA-256 hash.</p>
+                </div>
+              </button>
+
+              {/* Step 4 */}
+              <button
+                onClick={() => setActiveStep(4)}
+                className={`w-full text-left p-5 rounded-2xl border transition-all duration-200 flex gap-4 ${
+                  activeStep === 4
+                    ? "bg-white border-blue-500 shadow-md ring-2 ring-blue-500/10"
+                    : "bg-[#F3F3EF]/50 hover:bg-[#F3F3EF] border-transparent"
+                }`}
+              >
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  activeStep === 4 ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-600"
+                }`}>
+                  4
+                </span>
+                <div>
+                  <h4 className="font-bold text-slate-800 text-sm">Get Verification Receipt</h4>
+                  <p className="text-xs text-slate-500 mt-1">Verify that your votes match the secure cryptographic chain receipt.</p>
+                </div>
+              </button>
+
             </div>
 
-            {/* Step 2 */}
-            <div className="bg-white border border-[#E5E4DE] rounded-2xl p-6 relative hover-lift">
-              <div className="absolute top-6 right-6 text-2xl font-bold text-slate-200">02</div>
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-[#0B3C95] grid place-items-center mb-6">
-                📑
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Review Your Ballot</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                See all races and candidates for your district. Take your time — nothing is submitted until you confirm.
-              </p>
-            </div>
+            {/* Right side: Interactive simulator terminal */}
+            <div className="lg:col-span-7 bg-white border border-[#E5E4DE] rounded-3xl p-6 shadow-sm flex flex-col justify-between min-h-[380px]">
+              
+              {activeStep === 1 && (
+                <div className="flex flex-col justify-between h-full space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-700">FACIAL VERIFICATION SIMULATOR</span>
+                    <span className="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-full">ACTIVE</span>
+                  </div>
+                  
+                  <div className="relative bg-slate-900 aspect-video rounded-2xl overflow-hidden flex flex-col items-center justify-center text-white border border-slate-800">
+                    {/* Simulated camera scanning beam */}
+                    {isScanning && (
+                      <div className="absolute left-0 right-0 h-1 bg-green-500 shadow-[0_0_10px_#22c55e] animate-scan-beam" style={{
+                        animation: 'scan-beam 2s infinite ease-in-out'
+                      }}></div>
+                    )}
+                    
+                    <div className="z-10 text-center space-y-2">
+                      {isScanning ? (
+                        <>
+                          <div className="text-4xl animate-pulse">📷</div>
+                          <p className="text-xs font-semibold tracking-wider text-green-400">ANALYZING FACIAL STRUCTURE...</p>
+                          <p className="text-xl font-bold font-mono text-green-300">{scanningProgress}%</p>
+                        </>
+                      ) : scanningProgress === 100 ? (
+                        <>
+                          <div className="text-4xl text-green-400">✓</div>
+                          <p className="text-xs font-bold tracking-wider text-green-400">BIOMETRIC MATCH CONFIRMED</p>
+                          <p className="text-[10px] text-slate-400">Liveness check: Passed · Match score: 98.7%</p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-4xl text-slate-400">👤</div>
+                          <p className="text-xs font-semibold text-slate-300">Camera Feed Offline</p>
+                          <p className="text-[10px] text-slate-500">Click below to start simulation</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
 
-            {/* Step 3 */}
-            <div className="bg-white border border-[#E5E4DE] rounded-2xl p-6 relative hover-lift">
-              <div className="absolute top-6 right-6 text-2xl font-bold text-slate-200">03</div>
-              <div className="w-10 h-10 rounded-xl bg-purple-50 text-[#0B3C95] grid place-items-center mb-6">
-                🔐
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Cast & Encrypt</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Your choices are encrypted the moment you submit. Even our servers cannot see how you voted.
-              </p>
-            </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <button
+                      onClick={triggerScan}
+                      disabled={isScanning}
+                      className="px-4 py-2 bg-[#0B3C95] hover:bg-[#072C70] disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl text-xs transition"
+                    >
+                      {scanningProgress === 100 ? "Restart Verification" : "Start Face Scan"}
+                    </button>
+                    <button
+                      onClick={() => setActiveStep(2)}
+                      className="text-xs text-blue-600 font-bold hover:underline"
+                    >
+                      Proceed to Step 2 →
+                    </button>
+                  </div>
+                </div>
+              )}
 
-            {/* Step 4 */}
-            <div className="bg-white border border-[#E5E4DE] rounded-2xl p-6 relative hover-lift">
-              <div className="absolute top-6 right-6 text-2xl font-bold text-slate-200">04</div>
-              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center mb-6">
-                ✓
-              </div>
-              <h3 className="font-bold text-slate-900 mb-2">Get Your Receipt</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Receive a unique verification code. Use it any time to confirm your vote was counted correctly.
-              </p>
-            </div>
+              {activeStep === 2 && (
+                <div className="flex flex-col justify-between h-full space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-700">BALLOT REVIEW SIMULATOR</span>
+                    <span className="text-[10px] text-indigo-600 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full font-mono">STEP 02</span>
+                  </div>
 
+                  <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Mock Office: Federal President</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        onClick={() => setDemoSelectedCandidate("Dr. Rivera")}
+                        className={`p-3 rounded-xl border text-left transition ${
+                          demoSelectedCandidate === "Dr. Rivera"
+                            ? "bg-white border-blue-500 shadow-sm ring-1 ring-blue-500"
+                            : "bg-white border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="font-bold text-xs text-slate-800">Dr. Rivera</div>
+                        <div className="text-[9px] text-slate-500">Democrat · Bio: Medical Reform</div>
+                      </button>
+                      
+                      <button
+                        onClick={() => setDemoSelectedCandidate("Senator Vance")}
+                        className={`p-3 rounded-xl border text-left transition ${
+                          demoSelectedCandidate === "Senator Vance"
+                            ? "bg-white border-blue-500 shadow-sm ring-1 ring-blue-500"
+                            : "bg-white border-slate-200 hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="font-bold text-xs text-slate-800">Senator Vance</div>
+                        <div className="text-[9px] text-slate-500">Republican · Bio: Economic Tech</div>
+                      </button>
+                    </div>
+                    {demoSelectedCandidate && (
+                      <p className="text-[10px] text-emerald-600 font-medium">Selected Candidate: <span className="font-bold">{demoSelectedCandidate}</span></p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-[10px] text-slate-400">Click a card to select candidate.</span>
+                    <button
+                      onClick={() => setActiveStep(3)}
+                      className="text-xs text-blue-600 font-bold hover:underline"
+                    >
+                      Go to Step 3 (Encryption) →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeStep === 3 && (
+                <div className="flex flex-col justify-between h-full space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-700">BALLOT ENCRYPTION SIMULATOR</span>
+                    <span className="text-[10px] text-purple-600 font-semibold bg-purple-50 px-2 py-0.5 rounded-full font-mono">STEP 03</span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="bg-slate-900 p-4 rounded-2xl text-white font-mono text-xs space-y-2 border border-slate-800">
+                      <div className="flex justify-between text-slate-400 text-[10px] border-b border-white/10 pb-1">
+                        <span>DATA PACKET DESCRIPTION</span>
+                        <span>PLAINTEXT VALUE</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Office:</span>
+                        <span className="text-blue-300">President</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Selection:</span>
+                        <span className="text-blue-300">{demoSelectedCandidate || "None Selected"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Secret Salt:</span>
+                        <span className="text-blue-300">8df02ad927e1</span>
+                      </div>
+                      
+                      {isEncrypting ? (
+                        <div className="pt-2 text-center text-[10px] text-amber-300 uppercase tracking-widest animate-pulse">
+                          Generating SHA-256 Hash Chain Link...
+                        </div>
+                      ) : encryptedHash ? (
+                        <div className="pt-2 border-t border-white/10 space-y-1">
+                          <span className="text-green-400 font-bold text-[9px] uppercase tracking-wider">SHA-256 CRYPTO-HASH RECORDED:</span>
+                          <p className="text-[9px] text-green-300 break-all bg-green-950/40 p-2 rounded border border-green-800/40">{encryptedHash}</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2">
+                    <button
+                      onClick={handleDemoEncrypt}
+                      disabled={isEncrypting}
+                      className="px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs transition"
+                    >
+                      {encryptedHash ? "Re-Encrypt Ballot" : "Encrypt & Submit"}
+                    </button>
+                    {encryptedHash && (
+                      <button
+                        onClick={() => setActiveStep(4)}
+                        className="text-xs text-blue-600 font-bold hover:underline animate-bounce-subtle"
+                      >
+                        Reveal Secure Receipt →
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeStep === 4 && (
+                <div className="flex flex-col justify-between h-full space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-bold text-slate-700">BALLOT RECEIPT SIMULATOR</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full font-mono">STEP 04</span>
+                  </div>
+
+                  <div className="bg-white border-2 border-dashed border-slate-200 p-5 rounded-2xl flex flex-col items-center text-center space-y-3">
+                    <span className="text-3xl text-emerald-500">📜</span>
+                    <div>
+                      <h6 className="font-bold text-slate-800 text-sm">Official Ballot Receipt</h6>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Cryptographic verification token</p>
+                    </div>
+                    <div className="bg-slate-50 w-full p-2.5 rounded-xl border border-slate-100 font-mono text-[10px] text-slate-600 select-all relative">
+                      RECEIPT-8F92A-4B7C
+                    </div>
+                    <p className="text-[9px] text-slate-400 leading-relaxed max-w-xs">
+                      This receipt proves your ballot is safely linked into the cryptographic ledger, without revealing your name or selection to any auditors.
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText("RECEIPT-8F92A-4B7C");
+                        toast.success("Receipt ID copied to clipboard!");
+                      }}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition"
+                    >
+                      Copy Receipt ID
+                    </button>
+                    <button
+                      onClick={() => setActiveStep(1)}
+                      className="text-xs text-blue-600 font-bold hover:underline"
+                    >
+                      Restart Process Simulator ↺
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </div>
           </div>
         </div>
       </section>
@@ -362,34 +691,55 @@ export default function Landing() {
               <h2 className="text-3xl font-extrabold text-slate-900 mt-2">Active Ballots Near You</h2>
             </div>
             
-            {/* Location Dropdown */}
-            <div className="mt-4 md:mt-0 relative inline-block">
-              <select
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-                className="bg-white border border-slate-200 text-slate-700 py-2.5 px-4 pr-10 rounded-xl text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-[#0B3C95]/20 appearance-none"
-              >
-                <option value="All Locations">📍 All Locations</option>
-                <option value="Los Angeles, CA">Los Angeles, CA</option>
-                <option value="California">California</option>
-                <option value="National">National</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
-                ▾
+            {/* Filters and Sorting Controls */}
+            <div className="mt-4 md:mt-0 flex flex-wrap gap-3 items-center">
+              
+              {/* Location Dropdown */}
+              <div className="relative inline-block">
+                <select
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-700 py-2.5 px-4 pr-10 rounded-xl text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-[#0B3C95]/20 appearance-none"
+                >
+                  <option value="All Locations">📍 All Locations</option>
+                  <option value="Los Angeles, CA">Los Angeles, CA</option>
+                  <option value="California">California</option>
+                  <option value="National">National</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                  ▾
+                </div>
               </div>
+
+              {/* Sorting Dropdown */}
+              <div className="relative inline-block">
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="bg-white border border-slate-200 text-slate-700 py-2.5 px-4 pr-10 rounded-xl text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-[#0B3C95]/20 appearance-none"
+                >
+                  <option value="endTimeAsc">⏰ Sort: Ends Soonest</option>
+                  <option value="startTimeDesc">📅 Sort: Newest Start</option>
+                  <option value="startTimeAsc">📅 Sort: Oldest Start</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                  ▾
+                </div>
+              </div>
+
             </div>
           </div>
 
           {/* Elections Grid */}
           {loading ? (
             <div className="py-20"><Loader /></div>
-          ) : filteredElections.length === 0 ? (
+          ) : sortedElections.length === 0 ? (
             <div className="bg-white border border-[#E5E4DE] rounded-3xl p-12 text-center text-slate-500 max-w-lg mx-auto">
               No active elections found for {locationFilter === "All Locations" ? "your area" : locationFilter}.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredElections.map((elec) => {
+              {sortedElections.map((elec) => {
                 const meta = getElectionMeta(elec.title);
                 return (
                   <div 
@@ -439,7 +789,6 @@ export default function Landing() {
               })}
             </div>
           )}
-
         </div>
       </section>
 

@@ -4,6 +4,7 @@ import elections from './routes/election.routes.js';
 import votes from './routes/vote.routes.js';
 import admin from './routes/admin.routes.js';
 import verify from './routes/verify.routes.js';
+import contact from './routes/contact.routes.js';
 
 const r = Router();
 r.get('/health', (_req, res) =>
@@ -14,5 +15,6 @@ r.use('/elections', elections);
 r.use('/votes', votes);
 r.use('/admin', admin);
 r.use('/verify', verify);
+r.use('/contact', contact);
 
 export default r;

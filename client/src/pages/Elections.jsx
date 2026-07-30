@@ -8,6 +8,7 @@ import { fmtDate } from "../utils/formatters";
 
 export default function Elections() {
   const [items, setItems] = useState(null);
+  const [sortOrder, setSortOrder] = useState("endTimeAsc");
   const { user, token, setAuth } = useAuth();
 
   useEffect(() => {
@@ -25,6 +26,19 @@ export default function Elections() {
   }, []);
 
   if (!items) return <Loader />;
+
+  const sortedItems = [...items].sort((a, b) => {
+    if (sortOrder === "endTimeAsc") {
+      return new Date(a.endTime) - new Date(b.endTime);
+    }
+    if (sortOrder === "startTimeDesc") {
+      return new Date(b.startTime) - new Date(a.startTime);
+    }
+    if (sortOrder === "startTimeAsc") {
+      return new Date(a.startTime) - new Date(b.startTime);
+    }
+    return 0;
+  });
 
   // Helper to map categories based on titles
   const getElectionMeta = (title) => {
@@ -51,9 +65,25 @@ export default function Elections() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="border-b border-slate-200 pb-4 mb-8">
-        <h3 className="text-3xl font-extrabold text-[#0B3C95]">Active Ballots</h3>
-        <p className="text-slate-500 text-sm mt-1">Browse, view candidate rosters, and cast your official digital vote.</p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between border-b border-slate-200 pb-4 mb-8 gap-4">
+        <div>
+          <h3 className="text-3xl font-extrabold text-[#0B3C95]">Active Ballots</h3>
+          <p className="text-slate-500 text-sm mt-1">Browse, view candidate rosters, and cast your official digital vote.</p>
+        </div>
+        <div className="relative inline-block self-start sm:self-center">
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="bg-white border border-slate-200 text-slate-700 py-2 px-4 pr-10 rounded-xl text-xs font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-[#0B3C95]/20 appearance-none"
+          >
+            <option value="endTimeAsc">⏰ Sort: Ends Soonest</option>
+            <option value="startTimeDesc">📅 Sort: Newest Start</option>
+            <option value="startTimeAsc">📅 Sort: Oldest Start</option>
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            ▾
+          </div>
+        </div>
       </div>
 
       {!user?.kycComplete && (
@@ -75,14 +105,14 @@ export default function Elections() {
         </div>
       )}
 
-      {items.length === 0 && (
+      {sortedItems.length === 0 && (
         <div className="bg-white border border-slate-150 rounded-3xl p-12 text-center text-slate-500">
           No elections available right now.
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((e) => {
+        {sortedItems.map((e) => {
           const meta = getElectionMeta(e.title);
           return (
             <div key={e._id} className="bg-white border border-slate-200 rounded-3xl p-6 flex flex-col justify-between hover-lift shadow-sm">
